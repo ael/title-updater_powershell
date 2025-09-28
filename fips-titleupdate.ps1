@@ -12,6 +12,24 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 $udp = New-Object Net.Sockets.UdpClient
 $udp.EnableBroadcast = $true
 
+function Send-ntfy{
+    param(
+        $title,
+        $message
+    )
+    $Request = @{
+    Method = "POST"
+    URI = "https://ntfy.sh/xxxxxx"
+    Headers = @{
+        Title = $title
+        Priority = "default"
+        Tags = "rotating_light"
+    }
+    Body = $message
+    }
+    Invoke-RestMethod @Request
+}
+
 $studioref = $null
 Write-Output "$(Get-Date -format 'u') | Script gestartet"
 
@@ -25,6 +43,8 @@ if($studioref -ne $onairstudio) {
     $message = @{studio = $onairstudio} | ConvertTo-Json -Depth 1
     $bytes = [Text.Encoding]::ASCII.GetBytes($message)
     $udp.Send($bytes, $bytes.Length, $broadcast_ip, $udp_port)
+    $ntfybody = "Es sendet jetzt $onairstudio"
+    Send-ntfy "Fips Kreuzschiene" $ntfybody
     $studioref = $onairstudio
 }
 
@@ -33,6 +53,8 @@ function Send-Udp($songinfo) {
     $bytes = [Text.Encoding]::ASCII.GetBytes($message)
     $udp.Send($bytes, $bytes.Length, $broadcast_ip, $udp_port)
 }
+
+
 
 
 
